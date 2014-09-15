@@ -1,0 +1,4 @@
+{
+    "main": "com.atwoki.hydro.auth.TokenManager",
+    "includes": "hydro~corelib~1.0"
+}
