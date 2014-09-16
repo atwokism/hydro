@@ -1,0 +1,65 @@
+<div id="event_bus_control" xmlns="http://www.w3.org/1999/html">
+    <div>
+        <form onsubmit="return false;" id="event_message_publish_form">
+            <div>
+                <div>
+                    <label>Event</label>
+                    <input type="text" class="input-xlarge" placeholder="Name" id="event_message_name"
+                           ng-model="event.name">
+                    <input type="text" class="input-mini" placeholder="v1" id="evt_msg_version"
+                            ng-model="event.version">
+                </div>
+                <div>
+                    <label>Process</label>
+                    <input type="text" class="input-large" placeholder="Name" id="event_message_process"
+                           ng-model="event.process">
+                    <input type="text" class="input-medium" placeholder="Correlation Id" id="event_message_correlation"
+                           ng-model="event.correlation">
+                </div>
+                <div>
+                    <label>Payload XML</label>
+                    <textarea class="input-xxlarge" placeholder="<data>hi</data>" id="event_message_data"
+                              ng-model="event.payload"></textarea>
+                </div>
+                <div>
+                    <label>Execution</label>
+                    <div>
+                        <label class="radio">
+                            <input type="radio" name="exec_radio" value="sync">Synchronous
+                        </label>
+                        <div class="input-prepend offset1">
+                            <span class="add-on">Timeout</span>
+                            <span class="add-on">
+                                <input type="checkbox" name="timeout">
+                            </span>
+                            <input class="input-mini" id="event_timeout" name="timeout_value" type="text">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="radio">
+                            <input type="radio" name="exec_radio" value="async">Asynchronous</input>
+                        </label>
+                        <label class="checkbox offset1">
+                            <span></span>
+                            <input type="checkbox" name="callback">Callback
+                        </label>
+                    </div>
+                </div>
+                <div class="offset9">
+                    <label>
+                        <button class="btn btn-primary" type="button" id="event_bus_control_status_button"
+                            ng-click="publishAndWait(event)">Publish Event</button>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div>
+        <div class="alert alert-info" id="event_bus_control_status_label">
+            <div>
+                <label>Response</label>
+                <label>{{publish_response_message}}</label>
+            </div>
+        </div>
+    </div>
+</div>
