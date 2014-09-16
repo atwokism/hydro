@@ -5,13 +5,14 @@
     <meta charset="utf-8">
     <title>Vert.x WebMod - App</title>
     <link href="/resources/css/bootstrap.css" rel="stylesheet">
+    <link href="/resources/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/resources/css/grid/ui.jqgrid.css" rel="stylesheet">
     <style>
         body {
             /* 60px to make the container go all the way to the bottom of the top bar */
             padding-top: 60px;
         }
     </style>
-    <link href="/resources/css/bootstrap-responsive.css" rel="stylesheet">
 </head>
 <body ng-app="hydro">
     <div>
@@ -30,6 +31,9 @@
                         </li>
                         <li>
                             <a href="#/publish/event/view">Publish Event</a>
+                        </li>
+                        <li>
+                            <a href="#/events/db/view">View Events</a>
                         </li>
                     </ul>
                 </div>
@@ -56,10 +60,13 @@
         <script src="/resources/js/lib/jquery-1.10.1.js"></script>
         <script src="/resources/js/lib/sockjs-0.3.4.js"></script>
         <script src="/resources/js/lib/vertxbus.js"></script>
+        <script src="/resources/js/lib/pouchdb-3.0.5.min.js"></script>
         <script src="/resources/js/lib/angular.js"></script>
         <script src="/resources/js/lib/angular-resource.js"></script>
         <script src="/resources/js/lib/angular-route.js"></script>
         <script src="/resources/js/lib/hydro-0.0.1.js"></script>
+        <script src="/resources/js/grid/jquery.jqGrid.min.js"></script>
+        <script src="/resources/js/grid/i18n/grid.locale-en.js"></script>
         <script src="/resources/js/app/app.js"></script>
         <script src="/resources/js/app/controllers.js"></script>
         <script src="/resources/js/app/services.js"></script>

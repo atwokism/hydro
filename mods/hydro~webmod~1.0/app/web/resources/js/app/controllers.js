@@ -36,7 +36,7 @@ angular
         };
     })
 
-    .controller('SessionCtrl', function($scope, $route, authFactory, termFactory, messageFactory, apiRESTFactory) {
+    .controller('SessionCtrl', function($scope, $route, authFactory, termFactory, messageFactory, apiRESTFactory, dbFactory) {
 
         messageFactory.touch();
 
@@ -46,6 +46,7 @@ angular
         $scope.user_id = termFactory.identity();
         $scope.session_id = termFactory.session();
         $scope.expiry_value = termFactory.expiry();
+        $scope.event_db_row_count = 0;
 
         $scope.$watch('profile', function() {
             // $scope.profile = termFactory.profile();
@@ -74,28 +75,6 @@ angular
         };
 
         $scope.publishAndWait = function(event){
-            /*
-            var wait = 2000;
-            var pubMsg = {
-                "meta": termFactory.metadata('promise'),
-                "event": messageFactory.event(event),
-                "credentials": {
-                    "token": termFactory.profile().secret
-                }
-            };
-            var success = function(data, status, headers, config) {
-                $scope.publish_response_message = JSON.stringify(data, undefined, 2);
-                termFactory.log('received publish response: ' + JSON.stringify(data));
-            };
-            var error = function(data, status, headers, config) {
-                termFactory.log('error: ' + JSON.stringify(data) + ', status=' + status);
-            };
-            var timeout = function(data, status, headers, config) {
-                termFactory.log('received publish response: ' + JSON.stringify(data));
-            };
-            */
-            // termFactory.envelope(data, address, Helper.action.execute, Helper.transact.promise);
-            // apiRESTFactory.executeWithTimeout('/json-rest/api/', Helper.uuid(), 'hydro.event.publish', pubMsg, wait, success, error, timeout);
             $scope.testPubWithTimeout(event);
         };
 
@@ -103,15 +82,19 @@ angular
 
             var success = function(data, status, headers, config) {
                 $scope.publish_response_message = JSON.stringify(data, undefined, 2);
+                dbFactory.insert(data);
                 termFactory.log('received publish response: ' + JSON.stringify(data));
             };
             var error = function(data, status, headers, config) {
+                dbFactory.insert(data);
                 termFactory.log('error: ' + JSON.stringify(data) + ', status=' + status);
             };
             var timeout = function(data, status, headers, config) {
+                dbFactory.insert(data);
                 success(data, status, headers, config);
             };
             var envelope = termFactory.envelope(event, 'hydro.event.publish', Helper.action.execute, Helper.transact.promise, event.correlation);
+            dbFactory.insert(envelope);
             apiRESTFactory.testWithTimeout(envelope, '/json-rest/api/', success, error, timeout);
         };
 
@@ -123,6 +106,59 @@ angular
                     "token": termFactory.profile().secret
                 }
             };
+        };
+
+
+
+        $scope.populateEventsView = function() {
+
+            var grid = jQuery("#grid_1").jqGrid({
+                datatype: "json",
+                colNames:['Process','Correlation','Event','Version','Key','ID','Action','Address','Type','Source'],
+                colModel:[
+                    {name:'process', index:'process', width:80},
+                    {name:'correlation', index:'correlation', width:90},
+                    {name:'name', index:'name asc, invdate', width:80},
+                    {name:'version', width:20, align: "right"},
+                    {name:'key', index:'key', width:60},
+                    {name:'id', index:'id', width:60},
+                    {name:'action', width:50},
+                    {name:'address', index:'address', width:100},
+                    {name:'transact', width:50},
+                    {name:'source', width:120}
+                ],
+                rowNum:10,
+                rowList:[5,10,20],
+                pager: '#pager_1',
+                sortname: 'process',
+                viewrecords: true,
+                sortorder: "asc",
+                caption:"Event Viewer"
+            });
+
+            var c = function(resultset) {
+                termFactory.log(resultset);
+                $scope.event_db_row_count = resultset.total_rows;
+
+                var data = [];
+                resultset.rows.forEach(function(row) {
+                    var d = {
+                        "id": row.doc.id,
+                        "key": row.key,
+                        "correlation": row.doc.correlation,
+                        "name": row.doc.data.name,
+                        "version": row.doc.data.version,
+                        "action": row.doc.action,
+                        "address": row.doc.address,
+                        "process": row.doc.data.process,
+                        "transact": row.doc.transact,
+                        "source": row.doc.source
+                    };
+                    data.push(d);
+                });
+                grid[0].addJSONData(data);
+            };
+            dbFactory.retrieve(c);
         };
 
         $scope.clear = function(event) {

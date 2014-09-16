@@ -365,4 +365,52 @@ angular
 
         return factory;
 
+    })
+
+    .factory('dbFactory', function(termFactory) {
+        var factory = {};
+        var remoteCouch = false;
+        var db = new PouchDB('hydro');
+
+        factory.subscribe = function(document, f) {
+
+        };
+
+        db.info(function(err, info) {
+            termFactory.log(info);
+            db
+                .changes({
+                    since: info.update_seq,
+                    live: true
+                })
+                .on('change', function(change) {
+                    termFactory.log(change);
+                });
+        });
+
+        factory.insert = function(document) {
+            db.post(document, { local_seq:true }, function(error, response) {
+                if (error) {
+                    termFactory.log(error);
+                } else if (response && response.ok) {
+                    termFactory.log(response);
+                }
+            });
+        };
+
+        factory.retrieve = function(onresults) {
+            var o = {
+                include_docs: true,
+                descending: true
+            };
+            db.allDocs(o, function(err, doc) {
+                onresults(doc);
+            });
+        };
+
+        return factory;
+    })
+
+    .factory('gridFactory', function(termFactory) {
+
     });

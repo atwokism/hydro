@@ -26,6 +26,10 @@ angular
         .when('/home/view', {
             templateUrl: '/pages/views/splash_screen.html',
             controller: 'SessionCtrl'
+        })
+        .when('/events/db/view', {
+            templateUrl: '/pages/views/events_view.html',
+            controller: 'SessionCtrl'
         });
 }]);
 
