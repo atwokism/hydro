@@ -1,0 +1,92 @@
+<project name="busmod" default="deploy-dist" basedir="">
+
+    <property file="build.properties"/>
+    <property name="mod.base" value="${mods.system}/${mod.name}"/>
+    <property name="app.base" value="${mod.base}/app"/>
+    <property name="src.base" value="${mod.base}/src"/>
+    <property name="lib.base" value="${mod.base}/lib"/>
+    <property name="dist.base" value="${mod.base}/dist"/>
+    <property name="dist.build" value="${mod.base}/build"/>
+    <property name="zip.name" value="${mod.name}"/>
+    <property name="dist.zip" value="${dist.base}/${zip.name}.zip"/>
+
+    <target name="create-dist" description="create the distro" depends="destroy-dist">
+        <mkdir dir="${mod.base}"/>
+        <copy todir="${mod.base}">
+            <fileset dir="../assets/mod"/>
+        </copy>
+        <mkdir dir="${mod.base}/src"/>
+        <mkdir dir="${mod.base}/lib"/>
+    </target>
+
+    <target name="destroy-dist" description="delete the distro">
+        <delete dir="${mod.base}"/>
+        <delete file="${mods.system}/../conf/mods/${mod.name}.conf"/>
+    </target>
+
+    <target name="setup-compile" description="setup compilation pre-requisites">
+        <delete dir="${dist.build}"/>
+        <tstamp>
+            <format property="time.stamp" pattern="yyMM-ddhhmm" locale="en" />
+        </tstamp>
+    </target>
+
+    <target name="clean-dist" description="clean the distro">
+        <delete dir="${dist.build}"/>
+        <delete>
+            <fileset dir="${dist.base}">
+                <include name="*.zip"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="deploy-dist" description="deploy the mod to specified local directory repo" depends="tag-dist">
+        <delete dir="${mods.home}/${mod.name}"/>
+        <mkdir dir="${mods.home}/${mod.name}"/>
+        <unzip src="${dist.zip}" dest="${mods.home}/${mod.name}"/>
+    </target>
+
+    <path id="compile-classpath" description="determine the compile classpath">
+        <fileset dir="${lib.base}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${vertx.home}/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${hydro.core.lib}/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <path location="${hydro.core.lib}"/>
+    </path>
+
+    <target name="compile-dist" description="compile the source for the mod" depends="setup-compile">
+        <mkdir dir="${dist.build}"/>
+        <javac srcdir="${src.base}" destdir="${dist.build}" classpathref="compile-classpath" debug="on" includeantruntime="false"/>
+    </target>
+
+    <target name="setup-package" description="pre-requisites for packaging the distro" depends="compile-dist">
+        <delete file="${dist.zip}"/>
+    </target>
+
+    <target name="package-dist" depends="setup-package" description="package the installable distro">
+        <copy todir="${dist.build}" file="${app.base}/mod.json"/>
+        <copy todir="${dist.build}" file="${app.base}/readme.txt"/>
+        <mkdir dir="${dist.build}/lib"/>
+        <copy todir="${dist.build}/lib">
+            <fileset dir="${lib.base}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+        <copy todir="${dist.build}">
+            <fileset dir="${app.base}" excludes="*.conf"/>
+        </copy>
+        <zip destfile="${dist.zip}" basedir="${dist.build}"/>
+        <copy file="${app.base}/mod.conf" tofile="${mods.system}/../conf/mods/${mod.name}.conf" />
+    </target>
+
+    <target name="tag-dist" depends="package-dist" description="tag the current distro build">
+        <copy file="${dist.zip}" tofile="${dist.base}/tagged/${zip.name}_${time.stamp}.zip" overwrite="true"/>
+    </target>
+
+</project>
+
