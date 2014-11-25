@@ -63,7 +63,7 @@ public class RequestBroker extends BusModBase {
     }
 
     private void processJSONResponse(Message<JsonObject> msgInstance, JsonObject jsonRes) {
-        // TODO robust logic required
+        // TODO robust logic required.
         sendOK(msgInstance, jsonRes);
     }
 
