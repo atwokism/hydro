@@ -10,6 +10,38 @@
     <property name="zip.name" value="${mod.name}"/>
     <property name="dist.zip" value="${dist.base}/${zip.name}.zip"/>
 
+    <macrodef name="git">
+        <attribute name="command"/>
+        <attribute name="dir" default=""/>
+        <element name="params" optional="true"/>
+        <sequential>
+            <echo message="git @{command}"/>
+            <exec executable="git" dir="@{dir}">
+                <arg value="@{command}"/>
+                <params/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="git-clone-pull">
+        <attribute name="repo"/>
+        <attribute name="dest"/>
+        <sequential>
+            <git command="clone">
+                <params>
+                    <arg value="@{repo}"/>
+                    <arg value="@{dest}"/>
+                </params>
+            </git>
+            <git command="pull" dir="@{dest}"/>
+        </sequential>
+    </macrodef>
+
+    <target name="sync-repo">
+        <mkdir dir="${mod.base}"/>
+        <git-clone-pull repo="${mods.repo}" dest="${mod.base}"/>
+    </target>
+
     <target name="create-dist" description="create the distro" depends="destroy-dist">
         <mkdir dir="${mod.base}"/>
         <copy todir="${mod.base}">
@@ -19,8 +51,11 @@
         <mkdir dir="${mod.base}/lib"/>
     </target>
 
-    <target name="destroy-dist" description="delete the distro">
+    <target name="safe-destroy-dist" description="delete the distro">
         <delete dir="${mod.base}"/>
+    </target>
+
+    <target name="destroy-dist" depends="safe-destroy-dist" description="delete the distro">
         <delete file="${mods.system}/../conf/mods/${mod.name}.conf"/>
     </target>
 
